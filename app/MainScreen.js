@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Button,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 export default function MainScreen() {
@@ -69,7 +69,8 @@ export default function MainScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 50 }]}
+>
       <Text style={styles.title}>Currency Converter</Text>
 
       <Text style={styles.label}>Base Currency:</Text>
