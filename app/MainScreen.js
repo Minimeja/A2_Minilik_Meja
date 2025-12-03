@@ -62,7 +62,7 @@ export default function MainScreen() {
 
     } catch (err) {
       console.log("API error:", err);
-      setError("API request failed. Check network.");
+    setError("Unable to fetch exchange rate. Check internet connection.");
     } finally {
       setLoading(false);
     }
