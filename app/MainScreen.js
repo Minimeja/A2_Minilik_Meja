@@ -79,6 +79,7 @@ export default function MainScreen() {
         value={base}
         onChangeText={setBase}
         autoCapitalize="characters"
+        placeholder="CAD"
       />
 
       <Text style={styles.label}>Destination Currency:</Text>
@@ -87,6 +88,7 @@ export default function MainScreen() {
         value={dest}
         onChangeText={setDest}
         autoCapitalize="characters"
+        laceholder="USD"
       />
 
       <Text style={styles.label}>Amount:</Text>
@@ -95,6 +97,7 @@ export default function MainScreen() {
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"
+        placeholder="1"
       />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
