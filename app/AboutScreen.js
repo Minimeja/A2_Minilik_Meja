@@ -6,6 +6,8 @@ export default function AboutScreen() {
       <Text style={styles.title}>About This App</Text>
       <Text style={styles.text}>Name: Minilik Meja</Text>
       <Text style={styles.text}>Student ID: 100516804</Text>
+      <Text style={styles.text}>Version: 1.0.0</Text>
+
 
       <Text style={[styles.text, { marginTop: 20 }]}>
         This app converts currencies using a live API. It demonstrates input

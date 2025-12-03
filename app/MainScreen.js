@@ -43,10 +43,7 @@ export default function MainScreen() {
     setResult(null);
 
     try {
-      // ✅ Frankfurter API: no key needed
-      // Example: https://api.frankfurter.app/latest?from=CAD&to=USD
       const url = `https://api.frankfurter.app/latest?from=${baseCode}&to=${destCode}`;
-
       const response = await fetch(url);
       const data = await response.json();
 
