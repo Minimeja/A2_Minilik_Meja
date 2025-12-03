@@ -25,7 +25,6 @@ export default function MainScreen() {
     const destCode = dest.trim().toUpperCase();
     const amt = parseFloat(amount);
 
-    // Validation
     if (baseCode.length !== 3 || destCode.length !== 3) {
       setError("Currency codes must be 3-letter codes like CAD, USD.");
       setResult(null);
@@ -43,7 +42,9 @@ export default function MainScreen() {
     setResult(null);
 
     try {
-      const url = `https://api.frankfurter.app/latest?from=${baseCode}&to=${destCode}`;
+      // Frankfurter API – no key needed
+      const url = `https://api.frankfurter.app/latest?amount=${amt}&from=${baseCode}&to=${destCode}`;
+
       const response = await fetch(url);
       const data = await response.json();
 
@@ -51,15 +52,23 @@ export default function MainScreen() {
         throw new Error("Rate not found");
       }
 
-      const rateValue = data.rates[destCode];
-      const convertedValue = (amt * rateValue).toFixed(2);
+      const rawRate = data.rates[destCode] / amt; // rate per 1 unit
+      const rawConverted = data.rates[destCode];
 
-      setRate(rateValue);
-      setResult(convertedValue);
+      const formattedRate = Number(rawRate).toFixed(4);
+      const formattedConverted = Number(rawConverted).toFixed(2);
 
+      setRate(formattedRate);
+      setResult({
+        rate: formattedRate,
+        converted: formattedConverted,
+        base: baseCode,
+        dest: destCode,
+        amount: amt,
+      });
     } catch (err) {
       console.log("API error:", err);
-    setError("Unable to fetch exchange rate. Check internet connection.");
+      setError("API request failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -67,60 +76,58 @@ export default function MainScreen() {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 50 }]}>
-  <Text style={styles.title}>Currency Converter</Text>
+      <Text style={styles.title}>Currency Converter</Text>
 
-  <Text style={styles.label}>Base Currency:</Text>
-  <View style={styles.inputContainer}>
-    <TextInput
-      style={styles.input}
-      value={base}
-      onChangeText={setBase}
-      autoCapitalize="characters"
-      placeholder="Enter Base Currency"
-    />
-    <Text style={styles.currencySymbol}>CAD</Text> {/* Add CAD symbol */}
-  </View>
+      <Text style={styles.label}>Base Currency:</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={base}
+          onChangeText={setBase}
+          autoCapitalize="characters"
+          placeholder="Enter Base Currency"
+        />
+        <Text style={styles.currencySymbol}>CAD</Text>
+      </View>
 
-  <Text style={styles.label}>Destination Currency:</Text>
-  <View style={styles.inputContainer}>
-    <TextInput
-      style={styles.input}
-      value={dest}
-      onChangeText={setDest}
-      autoCapitalize="characters"
-      placeholder="Enter Destination Currency"
-    />
-    <Text style={styles.currencySymbol}>USD</Text> {/* Add USD symbol */}
-  </View>
+      <Text style={styles.label}>Destination Currency:</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={dest}
+          onChangeText={setDest}
+          autoCapitalize="characters"
+          placeholder="Enter Destination Currency"
+        />
+        <Text style={styles.currencySymbol}>USD</Text>
+      </View>
 
-  <Text style={styles.label}>Amount:</Text>
-  <TextInput
-    style={styles.input}
-    value={amount}
-    onChangeText={setAmount}
-    keyboardType="numeric"
-    placeholder="Amount"
-  />
+      <Text style={styles.label}>Amount:</Text>
+      <TextInput
+        style={styles.input}
+        value={amount}
+        onChangeText={setAmount}
+        keyboardType="numeric"
+        placeholder="Amount"
+      />
 
-  {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-  {loading ? (
-    <ActivityIndicator size="large" color="#0000ff" />
-  ) : (
-    <Button title="CONVERT" onPress={handleConvert} />
-  )}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Button title="CONVERT" onPress={handleConvert} />
+      )}
 
-  {result && (
-  <View style={styles.box}>
-    <Text style={styles.result}>
-      {amount} {base} = {result.converted.toFixed(2)} {dest} {/* Display result with 2 decimal places */}
-    </Text>
-    <Text style={styles.rateText}>Rate Used: {result.rate.toFixed(4)}</Text> {/* Display rate with 4 decimal places */}
-  </View>
-)}
-
-</ScrollView>
-
+      {result && (
+        <View style={styles.box}>
+          <Text style={styles.result}>
+            {result.amount} {result.base} = {result.converted} {result.dest}
+          </Text>
+          <Text style={styles.rateText}>Rate Used: {result.rate}</Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
@@ -145,6 +152,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     marginTop: 4,
+    flex: 1,
   },
   error: {
     color: "red",
@@ -165,6 +173,17 @@ const styles = StyleSheet.create({
   rateText: {
     marginTop: 6,
     fontSize: 16,
+    color: "#333",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  currencySymbol: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
   },
 });
