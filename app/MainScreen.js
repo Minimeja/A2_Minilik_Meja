@@ -111,13 +111,14 @@ export default function MainScreen() {
   )}
 
   {result && (
-    <View style={styles.box}>
-      <Text style={styles.result}>
-        {amount} {base} = {result.converted} {dest}
-      </Text>
-      <Text style={styles.rateText}>Rate Used: {result.rate}</Text>
-    </View>
-  )}
+  <View style={styles.box}>
+    <Text style={styles.result}>
+      {amount} {base} = {result.converted.toFixed(2)} {dest} {/* Display result with 2 decimal places */}
+    </Text>
+    <Text style={styles.rateText}>Rate Used: {result.rate.toFixed(4)}</Text> {/* Display rate with 4 decimal places */}
+  </View>
+)}
+
 </ScrollView>
 
   );
