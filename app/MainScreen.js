@@ -71,8 +71,7 @@ export default function MainScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 50 }]}
 >
-      <Text style={styles.title}>Currency Converter</Text>
-
+      <Text style={styles.title}>Live Currency Converter</Text>
       <Text style={styles.label}>Base Currency:</Text>
       <TextInput
         style={styles.input}
@@ -97,7 +96,7 @@ export default function MainScreen() {
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"
-        placeholder="1"
+        
       />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
