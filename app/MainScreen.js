@@ -66,53 +66,60 @@ export default function MainScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 50 }]}
->
-      <Text style={styles.title}>Live Currency Converter</Text>
-      <Text style={styles.label}>Base Currency:</Text>
-      <TextInput
-        style={styles.input}
-        value={base}
-        onChangeText={setBase}
-        autoCapitalize="characters"
-        placeholder="CAD"
-      />
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 50 }]}>
+  <Text style={styles.title}>Currency Converter</Text>
 
-      <Text style={styles.label}>Destination Currency:</Text>
-      <TextInput
-        style={styles.input}
-        value={dest}
-        onChangeText={setDest}
-        autoCapitalize="characters"
-        laceholder="USD"
-      />
+  <Text style={styles.label}>Base Currency:</Text>
+  <View style={styles.inputContainer}>
+    <TextInput
+      style={styles.input}
+      value={base}
+      onChangeText={setBase}
+      autoCapitalize="characters"
+      placeholder="Enter Base Currency"
+    />
+    <Text style={styles.currencySymbol}>CAD</Text> {/* Add CAD symbol */}
+  </View>
 
-      <Text style={styles.label}>Amount:</Text>
-      <TextInput
-        style={styles.input}
-        value={amount}
-        onChangeText={setAmount}
-        keyboardType="numeric"
-        
-      />
+  <Text style={styles.label}>Destination Currency:</Text>
+  <View style={styles.inputContainer}>
+    <TextInput
+      style={styles.input}
+      value={dest}
+      onChangeText={setDest}
+      autoCapitalize="characters"
+      placeholder="Enter Destination Currency"
+    />
+    <Text style={styles.currencySymbol}>USD</Text> {/* Add USD symbol */}
+  </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+  <Text style={styles.label}>Amount:</Text>
+  <TextInput
+    style={styles.input}
+    value={amount}
+    onChangeText={setAmount}
+    keyboardType="numeric"
+    placeholder="Amount"
+  />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="blue" style={{ marginVertical: 16 }} />
-      ) : (
-        <Button title="CONVERT" onPress={handleConvert} />
-      )}
+  {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      {result && (
-        <View style={styles.box}>
-          <Text style={styles.result}>
-            {amount} {base} = {result} {dest}
-          </Text>
-          <Text style={styles.rateText}>Rate Used: {rate}</Text>
-        </View>
-      )}
-    </ScrollView>
+  {loading ? (
+    <ActivityIndicator size="large" color="#0000ff" />
+  ) : (
+    <Button title="CONVERT" onPress={handleConvert} />
+  )}
+
+  {result && (
+    <View style={styles.box}>
+      <Text style={styles.result}>
+        {amount} {base} = {result.converted} {dest}
+      </Text>
+      <Text style={styles.rateText}>Rate Used: {result.rate}</Text>
+    </View>
+  )}
+</ScrollView>
+
   );
 }
 
