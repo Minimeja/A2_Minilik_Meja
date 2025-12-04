@@ -42,7 +42,7 @@ export default function MainScreen() {
     setResult(null);
 
     try {
-      // Frankfurter API – no key needed
+    
       const url = `https://api.frankfurter.app/latest?amount=${amt}&from=${baseCode}&to=${destCode}`;
 
       const response = await fetch(url);
@@ -187,4 +187,3 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
-// review complete
