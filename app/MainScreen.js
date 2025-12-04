@@ -120,13 +120,14 @@ export default function MainScreen() {
       )}
 
       {result && (
-        <View style={styles.box}>
-          <Text style={styles.result}>
-            {result.amount} {result.base} = {result.converted} {result.dest}
-          </Text>
-          <Text style={styles.rateText}>Rate Used: {result.rate}</Text>
-        </View>
-      )}
+  <View style={styles.box}>
+    <Text style={styles.result}>
+      {amount} {base} is equal to {result.converted} {dest}
+    </Text>
+    <Text style={styles.rateText}>Conversion Rate: {result.rate.toFixed(4)}</Text>
+  </View>
+)}
+
     </ScrollView>
   );
 }
