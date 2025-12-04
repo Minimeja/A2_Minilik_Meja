@@ -27,5 +27,12 @@ Users can input a base currency, destination currency, and amount; the app fetch
 - Expo CLI
 - Expo Go mobile app
 
+## Run the app
+1. Install the dependencies:
+   ```bash
+   npm install
+   
+2.  npx expo start --tunnel
+ 
 
 
