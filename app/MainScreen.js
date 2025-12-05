@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 export default function MainScreen() {
-  const [base, setBase] = useState("INR");
+  const [base, setBase] = useState("CAD");
   const [dest, setDest] = useState("USD");
   const [amount, setAmount] = useState("1");
 
@@ -42,7 +42,7 @@ const handleConvert = async () => {
   setResult(null);
 
   try {
-    // Ask FreecurrencyAPI only for the two currencies we care about
+
     const url =
       `https://api.freecurrencyapi.com/v1/latest` +
       `?apikey=fca_live_vKzIU8OlPVHJ03oSFLk68iSyPfb3XkpFmCInnWtu` +
@@ -55,7 +55,7 @@ const handleConvert = async () => {
     }
 
     const data = await response.json();
-    // FreecurrencyAPI shape: { data: { "USD": 1, "INR": 83.2, ... } }
+
     const rates = data.data;
 
     const fromRate = rates[baseCode];
@@ -65,10 +65,8 @@ const handleConvert = async () => {
       throw new Error("Rate not found for one of the currencies");
     }
 
-    // Convert: first get rate for 1 baseCode in destCode,
-    // then multiply by the amount the user entered
-    const unitRate = toRate / fromRate;      // 1 baseCode -> ? destCode
-    const convertedAmount = amt * unitRate;  // amt baseCode -> ? destCode
+    const unitRate = toRate / fromRate;
+    const convertedAmount = amt * unitRate;
 
     const formattedRate = unitRate.toFixed(4);
     const formattedConverted = convertedAmount.toFixed(2);
