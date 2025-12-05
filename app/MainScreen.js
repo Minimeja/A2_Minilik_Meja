@@ -21,58 +21,74 @@ export default function MainScreen() {
   const [loading, setLoading] = useState(false);
 
 const handleConvert = async () => {
-    const baseCode = base.trim().toUpperCase();
-    const destCode = dest.trim().toUpperCase();
-    const amt = parseFloat(amount);
+  const baseCode = base.trim().toUpperCase();
+  const destCode = dest.trim().toUpperCase();
+  const amt = parseFloat(amount);
 
-    if (baseCode.length !== 3 || destCode.length !== 3) {
-      setError("Currency codes must be 3-letter codes like CAD, USD.");
-      setResult(null);
-      return;
-    }
-
-    if (isNaN(amt) || amt <= 0) {
-      setError("Amount must be a positive number.");
-      setResult(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
+  if (baseCode.length !== 3 || destCode.length !== 3) {
+    setError("Currency codes must be 3-letter codes like CAD, USD.");
     setResult(null);
+    return;
+  }
 
-    try {
-      // Replace the old URL with the new one using the API key
-    const url = `https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_vKzIU8OlPVHJ03oSFLk68iSyPfb3XkpFmCInnWtu&from=${baseCode}&to=${destCode}&amount=${amt}`;
+  if (isNaN(amt) || amt <= 0) {
+    setError("Amount must be a positive number.");
+    setResult(null);
+    return;
+  }
 
-      const response = await fetch(url);
-      const data = await response.json();
+  setLoading(true);
+  setError(null);
+  setResult(null);
 
-      if (!data || !data.rates || !data.rates[destCode]) {
-        throw new Error("Rate not found");
-      }
+  try {
+    // Ask FreecurrencyAPI only for the two currencies we care about
+    const url =
+      `https://api.freecurrencyapi.com/v1/latest` +
+      `?apikey=fca_live_vKzIU8OlPVHJ03oSFLk68iSyPfb3XkpFmCInnWtu` +
+      `&currencies=${baseCode},${destCode}`;
 
-      const rawRate = data.rates[destCode] / amt; // rate per 1 unit
-      const rawConverted = data.rates[destCode];
+    const response = await fetch(url);
 
-      const formattedRate = Number(rawRate).toFixed(4);
-      const formattedConverted = Number(rawConverted).toFixed(2);
-
-      setRate(formattedRate);
-      setResult({
-        rate: formattedRate,
-        converted: formattedConverted,
-        base: baseCode,
-        dest: destCode,
-        amount: amt,
-      });
-    } catch (err) {
-      console.log("API error:", err);
-      setError("API request failed. Please try again.");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    // FreecurrencyAPI shape: { data: { "USD": 1, "INR": 83.2, ... } }
+    const rates = data.data;
+
+    const fromRate = rates[baseCode];
+    const toRate = rates[destCode];
+
+    if (!fromRate || !toRate) {
+      throw new Error("Rate not found for one of the currencies");
+    }
+
+    // Convert: first get rate for 1 baseCode in destCode,
+    // then multiply by the amount the user entered
+    const unitRate = toRate / fromRate;      // 1 baseCode -> ? destCode
+    const convertedAmount = amt * unitRate;  // amt baseCode -> ? destCode
+
+    const formattedRate = unitRate.toFixed(4);
+    const formattedConverted = convertedAmount.toFixed(2);
+
+    setRate(formattedRate);
+    setResult({
+      rate: formattedRate,
+      converted: formattedConverted,
+      base: baseCode,
+      dest: destCode,
+      amount: amt,
+    });
+  } catch (err) {
+    console.log("API error:", err);
+    setError("API request failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
