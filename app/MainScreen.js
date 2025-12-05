@@ -1,4 +1,3 @@
-// app/MainScreen.js
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -84,14 +83,15 @@ export default function MainScreen() {
         <View style={styles.titleUnderline} />
 
         {/* ENTER AMOUNT */}
+        <Text style={styles.label}>ENTER AMOUNT</Text>
         <TextInput
           style={styles.input}
-          placeholder="ENTER AMOUNT"
-          placeholderTextColor="#ddd"
+          placeholder="Enter Amount"
           value={amount}
           onChangeText={setAmount}
           keyboardType="numeric"
         />
+
 
         {/* FROM */}
         <View style={styles.row}>
@@ -104,6 +104,7 @@ export default function MainScreen() {
           />
         </View>
 
+
         {/* TO */}
         <View style={styles.row}>
           <Text style={styles.label}>TO</Text>
@@ -114,6 +115,7 @@ export default function MainScreen() {
             autoCapitalize="characters"
           />
         </View>
+
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
