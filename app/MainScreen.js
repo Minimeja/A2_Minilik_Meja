@@ -1,3 +1,4 @@
+// app/MainScreen.js
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -6,7 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function MainScreen() {
@@ -20,206 +21,242 @@ export default function MainScreen() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-const handleConvert = async () => {
-  const baseCode = base.trim().toUpperCase();
-  const destCode = dest.trim().toUpperCase();
-  const amt = parseFloat(amount);
+  const handleConvert = async () => {
+    const baseCode = base.trim().toUpperCase();
+    const destCode = dest.trim().toUpperCase();
+    const amt = parseFloat(amount);
 
-  if (baseCode.length !== 3 || destCode.length !== 3) {
-    setError("Currency codes must be 3-letter codes like CAD, USD.");
-    setResult(null);
-    return;
-  }
-
-  if (isNaN(amt) || amt <= 0) {
-    setError("Amount must be a positive number.");
-    setResult(null);
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-  setResult(null);
-
-  try {
-
-    const url =
-      `https://api.freecurrencyapi.com/v1/latest` +
-      `?apikey=fca_live_vKzIU8OlPVHJ03oSFLk68iSyPfb3XkpFmCInnWtu` +
-      `&currencies=${baseCode},${destCode}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
+    // validation
+    if (baseCode.length !== 3 || destCode.length !== 3) {
+      setError("Currency codes must be 3-letter codes like CAD, USD.");
+      setResult(null);
+      return;
     }
 
-    const data = await response.json();
-
-    const rates = data.data;
-
-    const fromRate = rates[baseCode];
-    const toRate = rates[destCode];
-
-    if (!fromRate || !toRate) {
-      throw new Error("Rate not found for one of the currencies");
+    if (isNaN(amt) || amt <= 0) {
+      setError("Amount must be a positive number.");
+      setResult(null);
+      return;
     }
 
-    const unitRate = toRate / fromRate;
-    const convertedAmount = amt * unitRate;
+    setLoading(true);
+    setError(null);
+    setResult(null);
 
-    const formattedRate = unitRate.toFixed(4);
-    const formattedConverted = convertedAmount.toFixed(2);
+    try {
+      // FreecurrencyAPI: base_currency tells what all rates are based on
+      const url = `https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_vKzIU8OlPVHJ03oSFLk68iSyPfb3XkpFmCInnWtu&base_currency=${baseCode}`;
 
-    setRate(formattedRate);
-    setResult({
-      rate: formattedRate,
-      converted: formattedConverted,
-      base: baseCode,
-      dest: destCode,
-      amount: amt,
-    });
-  } catch (err) {
-    console.log("API error:", err);
-    setError("API request failed. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await fetch(url);
+      const data = await response.json();
 
+      // Response shape: { data: { USD: 0.72, EUR: ... } }
+      if (!data || !data.data || !data.data[destCode]) {
+        throw new Error("Rate not found");
+      }
+
+      const rateValue = Number(data.data[destCode]); // rate per 1 base unit
+      const convertedValue = rateValue * amt;
+
+      const formattedRate = rateValue.toFixed(4);
+      const formattedConverted = convertedValue.toFixed(2);
+
+      setRate(formattedRate);
+      setResult({
+        rate: formattedRate,
+        converted: formattedConverted,
+        base: baseCode,
+        dest: destCode,
+        amount: amt,
+      });
+    } catch (err) {
+      console.log("API error:", err);
+      setError("API request failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>CURRENCY CONVERTER</Text>
+      <View style={styles.card}>
+        <Text style={styles.title}>CURRENCY CONVERTER</Text>
+        <View style={styles.titleUnderline} />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Amount"
-        value={amount}
-        onChangeText={setAmount}
-        keyboardType="numeric"
-      />
-
-      <View style={styles.row}>
-        <Text style={styles.label}>From</Text>
+        {/* ENTER AMOUNT */}
         <TextInput
-          style={styles.currencyInput}
-          value={base}
-          onChangeText={setBase}
-          autoCapitalize="characters"
+          style={styles.input}
+          placeholder="ENTER AMOUNT"
+          placeholderTextColor="#ddd"
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="numeric"
         />
-      </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>To</Text>
-        <TextInput
-          style={styles.currencyInput}
-          value={dest}
-          onChangeText={setDest}
-          autoCapitalize="characters"
-        />
-      </View>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={handleConvert}>
-          <Text style={styles.buttonText}>GET EXCHANGE RATE</Text>
-        </TouchableOpacity>
-      )}
-
-      {result && (
-        <View style={styles.resultBox}>
-          <Text style={styles.result}>
-            {amount} {base} = {result.converted} {dest}
-          </Text>
-          <Text style={styles.rateText}>
-            Conversion Rate: {result.rate ? result.rate : "N/A"}
-          </Text>
+        {/* FROM */}
+        <View style={styles.row}>
+          <Text style={styles.label}>FROM</Text>
+          <TextInput
+            style={styles.currencyInput}
+            value={base}
+            onChangeText={setBase}
+            autoCapitalize="characters"
+          />
         </View>
-      )}
+
+        {/* TO */}
+        <View style={styles.row}>
+          <Text style={styles.label}>TO</Text>
+          <TextInput
+            style={styles.currencyInput}
+            value={dest}
+            onChangeText={setDest}
+            autoCapitalize="characters"
+          />
+        </View>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#F5D977" />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={handleConvert}>
+            <Text style={styles.buttonText}>GET EXCHANGE RATE</Text>
+          </TouchableOpacity>
+        )}
+
+        {result && (
+          <View style={styles.resultBox}>
+            <Text style={styles.result}>
+              {result.amount} {result.base} = {result.converted} {result.dest}
+            </Text>
+            <Text style={styles.rateText}>
+              Conversion Rate: {result.rate ? result.rate : "N/A"}
+            </Text>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  // whole screen background
   container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    flexGrow: 1,
+    paddingVertical: 40,
+    paddingHorizontal: 16,
+    backgroundColor: "#f2f2f2",
+    alignItems: "center",
     justifyContent: "center",
   },
+
+  // purple card
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: "#3F0073", // deep purple
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 26,
+    fontWeight: "900",
     textAlign: "center",
-    marginVertical: 20,
-    color: "#3e3e3e",
+    color: "#FFFFFF",
+    letterSpacing: 1,
   },
+
+  titleUnderline: {
+    marginTop: 6,
+    alignSelf: "center",
+    width: "65%",
+    height: 2,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 24,
+  },
+
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
-    marginBottom: 16,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 22,
   },
+
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
+    alignItems: "center",
+    marginBottom: 14,
   },
+
   label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flex: 0.4,
+    flex: 0.35,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#F5E8FF",
   },
+
   currencyInput: {
-    flex: 0.55,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
+    flex: 0.65,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     fontSize: 16,
-    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
   },
+
   button: {
-    backgroundColor: "#5cb85c",
+    marginTop: 20,
+    backgroundColor: "#F5D977", // light gold
     paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: 16,
     alignItems: "center",
   },
+
   buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  resultBox: {
-    marginTop: 30,
-    padding: 16,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    alignItems: "center",
-  },
-  result: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  rateText: {
+    color: "#3F0073",
     fontSize: 16,
-    color: "#333",
+    fontWeight: "900",
+    letterSpacing: 0.5,
+  },
+
+  resultBox: {
+    marginTop: 26,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#F5D977",
+    backgroundColor: "rgba(0,0,0,0.05)",
+  },
+
+  result: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+
+  rateText: {
+    fontSize: 14,
+    color: "#F5E8FF",
     textAlign: "center",
   },
+
   error: {
-    color: "red",
-    marginBottom: 10,
+    marginTop: 6,
+    color: "#FFB3B3",
     textAlign: "center",
+    fontSize: 13,
   },
 });
